@@ -20,6 +20,8 @@ git branch -a
 git chekout *nombre de la rama*
 
 //Para subir tus cambios después del 'git add .' y 'git commit -m "" '. Solo podras ejecutar el comando cuando hallas hecho checkout en una rama
-git pull
+git push origin POOT-CHAN-OMAR-ALEJANDRO
 
+//Para descargar cambios que hay en GitHub
+git pull
 
