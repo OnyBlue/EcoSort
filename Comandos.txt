@@ -1,0 +1,25 @@
+//Solito Git me pidió ejecutar este comando
+git config --global --add safe.directory C:/Users/omarp/Documents/React/EcoSort
+
+//Para acceder remotamente al GitHub
+git remote add origin https://github.com/OnyBlue/EcoSort.git
+
+//Para acceder a la rama main
+git branch -M main
+
+//Para subir la carpeta a la rama main
+git push -u origin main
+
+//Para descargar las ramas que se crearon en GitHub
+git fetch origin
+
+//Para verificar las ramas existentes
+git branch -a
+
+//Para cambiar de rama en el que se subirán tus cambios
+git chekout *nombre de la rama*
+
+//Para subir tus cambios después del 'git add .' y 'git commit -m "" '. Solo podras ejecutar el comando cuando hallas hecho checkout en una rama
+git pull
+
+
