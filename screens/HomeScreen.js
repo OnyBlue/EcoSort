@@ -1,5 +1,6 @@
 import React, { useState } from 'react'; // 1. Importamos useState
 import { View, Text, Button, StyleSheet } from 'react-native';
+import EstadoContenedor from "../components/EstadoContenedor";
 
 export default function HomeScreen({ navigation }) {
   // 2. Definimos el estado: 
@@ -27,6 +28,9 @@ export default function HomeScreen({ navigation }) {
         title="Ir a Detalles" 
         onPress={() => navigation.navigate('Details')} 
       />
+
+      <EstadoContenedor />
+      
     </View>
   );
 }
