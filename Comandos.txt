@@ -1,0 +1,47 @@
+//Solito Git me pidió ejecutar este comando
+git config --global --add safe.directory C:/Users/omarp/Documents/React/EcoSort
+
+//Para acceder remotamente al GitHub
+git remote add origin https://github.com/OnyBlue/EcoSort.git
+
+//Para acceder a la rama main
+git branch -M main
+
+//Para subir la carpeta a la rama main
+git push -u origin main
+
+//Para descargar las ramas que se crearon en GitHub
+git fetch origin
+
+//Para verificar las ramas existentes
+git branch -a
+
+//Para cambiar de rama en el que se subirán tus cambios
+git chekout *nombre de la rama*
+
+//Para subir tus cambios después del 'git add .' y 'git commit -m "" '. Solo podras ejecutar el comando cuando hallas hecho checkout en una rama
+git push origin POOT-CHAN-OMAR-ALEJANDRO
+
+//Para descargar cambios que hay en GitHub
+git pull
+
+______________________________________________________________________________________
+Despues de clonar el archivo te saldra error al iniciarlo, puedes hacer lo siguiente:
+Paso 1: Abrir PowerShell 
+•	Ejecutar como administrador 
+Paso 2: Escribir este comando
+Set-ExecutionPolicy RemoteSigned
+Paso 3: Confirmar
+Te va a preguntar algo como:
+¿Deseas cambiar la directiva de ejecución? Escribe: Y
+VAS A TU PROYECTO
+npx expo start
+si te sale ERROR ejecutas esto:
+npm cache clean –force
+Paso 2: Eliminar node_modules y package-lock.json
+rm -rf node_modules
+rm package-lock.json
+Reinstalar todo
+npm install
+ejecutas otra vez
+npx expo start
