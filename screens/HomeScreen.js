@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
+import EstadoContenedor from "../components/EstadoContenedor";
 
 export default function HomeScreen({ navigation }) {
 
@@ -53,6 +54,8 @@ export default function HomeScreen({ navigation }) {
         }
       />
 
+      <EstadoContenedor />
+      
       <View style={{ marginVertical: 5 }} />
 
       <Button 
