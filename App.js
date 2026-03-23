@@ -15,9 +15,9 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Example" component={ExampleScreen} />
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Details" component={DetailsScreen} />
+          <Stack.Screen name="Example" component={ExampleScreen}/>
+          <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+          <Stack.Screen name="Details" component={DetailsScreen} options={{headerShown: false}}/>
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
