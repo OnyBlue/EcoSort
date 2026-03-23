@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import EstadoContenedor from "../components/EstadoContenedor";
+
 
 export default function HomeScreen({ navigation }) {
   const [niveles, setNiveles] = useState({
@@ -111,6 +113,7 @@ export default function HomeScreen({ navigation }) {
         <ContainerCard tipo="Plástico" icon="🥤" />
         <ContainerCard tipo="Metal" icon="🥫" />
         <ContainerCard tipo="Papel" icon="📄" />
+        <EstadoContenedor />
 
       </ScrollView>
     </SafeAreaView>
