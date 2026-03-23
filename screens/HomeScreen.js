@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
 import EstadoContenedor from "../components/EstadoContenedor";
-
+import MenuDesplegable from "../components/MenuDesplegable";
 
 export default function HomeScreen({ navigation }) {
   const [niveles, setNiveles] = useState({
@@ -81,9 +81,11 @@ export default function HomeScreen({ navigation }) {
       <ScrollView contentContainerStyle={styles.container}>
         
         <View style={styles.header}>
-          <Text style={styles.title}>🌱 EcoSort App</Text>
-          <Text style={styles.tagline}>Gestión de residuo inteligente</Text>
-        </View>
+        <Text style={styles.title}>🌱 EcoSort App</Text>
+        <Text style={styles.tagline}>Gestión de residuo inteligente</Text>
+          </View>
+
+        <MenuDesplegable navigation={navigation} />
 
         <View style={styles.controlPanel}>
           <Text style={styles.controlLabel}>
