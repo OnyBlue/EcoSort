@@ -158,6 +158,22 @@ export default function HomeScreen({ navigation }) {
         <ContainerCard tipo="Papel" icon="📄" />
         <EstadoContenedor />
 
+        <TouchableOpacity 
+  style={{
+    backgroundColor: '#22C55E',
+    padding: 15,
+    borderRadius: 12,
+    marginTop: 20,
+    alignItems: 'center'
+  }}
+  onPress={() => navigation.navigate('Pokemon')}
+>
+  <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
+    Ver datos de la API (Pokémon)
+  </Text>
+</TouchableOpacity>
+
+
       </ScrollView>
     </SafeAreaView>
   );
