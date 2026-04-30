@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
-import { TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert } from 'react-native';
+
+// --- INTEGRACIÓN CON FIREBASE ---
+import { db } from '../firebaseConfig'; 
+import { collection, addDoc, serverTimestamp } from "firebase/firestore"; 
+
 import EstadoContenedor from "../components/EstadoContenedor";
 import MenuDesplegable from "../components/MenuDesplegable";
 
@@ -13,20 +17,51 @@ export default function HomeScreen({ navigation }) {
 
   const [seleccionado, setSeleccionado] = useState('Plástico');
 
+  // Colores dinámicos según el nivel
   const getStatusColor = (nivel) => {
     if (nivel >= 85) return '#EF4444'; 
     if (nivel >= 50) return '#F59E0B'; 
     return '#10B981'; 
   };
 
-  const modificarNivel = (cantidad) => {
+  // FUNCIÓN PARA ACTUALIZAR NIVEL Y GUARDAR EN LA NUBE
+  const modificarNivelYGuardar = async (cantidad) => {
+    const nuevoNivel = Math.max(0, Math.min(100, niveles[seleccionado] + cantidad));
+    
     setNiveles(prev => ({
       ...prev,
-      [seleccionado]: Math.max(0, Math.min(100, prev[seleccionado] + cantidad))
+      [seleccionado]: nuevoNivel
     }));
+
+    try {
+      await addDoc(collection(db, "reportes_reciclaje"), {
+        contenedor: seleccionado,
+        nivel: nuevoNivel,
+        fecha: serverTimestamp(),
+        tipo_accion: "Aumento de nivel"
+      });
+      console.log("Datos sincronizados con éxito");
+    } catch (error) {
+      console.error("Error al subir a Firebase: ", error);
+      Alert.alert("Error de conexión", "No se pudo guardar en la nube.");
+    }
   };
 
-  // Función para navegar a detalles
+  // Función para vaciar el contenedor
+  const reiniciarNivel = async () => {
+    setNiveles({...niveles, [seleccionado]: 0});
+    try {
+      await addDoc(collection(db, "reportes_reciclaje"), {
+        contenedor: seleccionado,
+        nivel: 0,
+        fecha: serverTimestamp(),
+        tipo_accion: "Contenedor vaciado"
+      });
+    } catch (e) {
+      console.log("Error al resetear: ", e);
+    }
+  };
+
   const irADetalles = (tipo) => {
     navigation.navigate('Details', {
       tipo: tipo,
@@ -47,9 +82,9 @@ export default function HomeScreen({ navigation }) {
         activeOpacity={0.8}
         onPress={() => {
           if (esActivo) {
-            irADetalles(tipo); // Si ya está seleccionado, navega
+            irADetalles(tipo); 
           } else {
-            setSeleccionado(tipo); // Si no, lo selecciona
+            setSeleccionado(tipo); 
           }
         }}
       >
@@ -63,10 +98,9 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        {/* Texto dinámico a la derecha */}
         {esActivo ? (
           <View style={styles.reportBadge}>
-            <Text style={styles.reportText}>Ver reporte {tipo.toLowerCase()} →</Text>
+            <Text style={styles.reportText}>Reporte →</Text>
           </View>
         ) : (
           <Text style={styles.dotMark}>●</Text>
@@ -78,12 +112,12 @@ export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView contentContainerStyle={styles.containerMain}>
         
         <View style={styles.header}>
-        <Text style={styles.title}>🌱 EcoSort App</Text>
-        <Text style={styles.tagline}>Gestión de residuo inteligente</Text>
-          </View>
+          <Text style={styles.title}>🌱 EcoSort App</Text>
+          <Text style={styles.tagline}>Gestión de residuo inteligente</Text>
+        </View>
 
         <MenuDesplegable navigation={navigation} />
 
@@ -98,16 +132,23 @@ export default function HomeScreen({ navigation }) {
           <View style={styles.row}>
             <TouchableOpacity 
               style={styles.mainButton} 
-              onPress={() => modificarNivel(10)}
+              onPress={() => modificarNivelYGuardar(10)} 
             >
-              <Text style={styles.buttonText}>Aumentar nivel</Text>
+              <Text style={styles.buttonText}>Aumentar</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={[styles.mainButton, { backgroundColor: '#E2E8F0' }]} 
-              onPress={() => setNiveles({...niveles, [seleccionado]: 0})}
+              onPress={reiniciarNivel} 
             >
               <Text style={[styles.buttonText, { color: '#64748B' }]}>Reiniciar</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[styles.mainButton, { backgroundColor: '#97ce4c' }]} 
+              onPress={() => navigation.navigate('RickMorty')} 
+            >
+              <Text style={styles.buttonText}>PEPINILLO RICK</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -139,13 +180,8 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
-  text: { fontSize: 18, marginBottom: 10 },
-  numero: { fontSize: 60, fontWeight: 'bold', color: '#2196F3', marginBottom: 20 },
-  buttonGap: { marginVertical: 8, width: '80%' },
-  divider: { height: 1, backgroundColor: '#ccc', width: '90%', marginVertical: 20 },
   safeArea: { flex: 1, backgroundColor: '#F8F9FA' },
-  container: { padding: 20 },
+  containerMain: { padding: 20 },
   header: { marginBottom: 20 },
   title: { fontSize: 26, fontWeight: 'bold', color: '#1A202C' },
   tagline: { fontSize: 14, color: '#718096' },
@@ -164,15 +200,16 @@ const styles = StyleSheet.create({
   controlLabel: { fontSize: 13, fontWeight: 'bold', color: '#A0AEC0', textTransform: 'uppercase', letterSpacing: 1 },
   numero: { fontSize: 56, fontWeight: 'bold', marginVertical: 5 },
   
-  row: { flexDirection: 'row', gap: 10, marginTop: 10 },
+  row: { flexDirection: 'row', gap: 10, marginTop: 10, width: '100%' },
   mainButton: {
     backgroundColor: '#2196F3',
-    paddingVertical: 14,
+    height: 50,
     borderRadius: 15,
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 15 },
+  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' },
 
   card: {
     backgroundColor: '#FFF',
@@ -184,8 +221,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: 'transparent',
     elevation: 2,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
   },
   cardActive: {
     borderColor: '#2196F3',
@@ -203,10 +238,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
   },
-  reportText: {
-    color: '#FFF',
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
+  reportText: { color: '#FFF', fontSize: 11, fontWeight: 'bold' },
   dotMark: { color: '#CBD5E0', fontSize: 18, marginRight: 5 }
 });

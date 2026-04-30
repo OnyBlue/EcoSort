@@ -6,8 +6,9 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 // Importamos nuestros componentes de pantalla
 import HomeScreen from './screens/HomeScreen';
 import DetailsScreen from './screens/DetailScreen';
-import ExampleScreen from './screens/Exapmle'; 
+import ExampleScreen from './screens/Exapmle';
 import PokemonScreen from './screens/PokemonScreen';
+import RickMortyScreen from './screens/RickMortyScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,11 +17,36 @@ export default function App() {
     <SafeAreaProvider>
       <NavigationContainer>
         <Stack.Navigator>
-          <Stack.Screen name="Example" component={ExampleScreen}/>
-          <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
-          <Stack.Screen name="Details" component={DetailsScreen} options={{headerShown: false}}/>
-           <Stack.Screen name="Pokemon" component={PokemonScreen} />
-           
+
+          <Stack.Screen 
+            name="Example" 
+            component={ExampleScreen}
+          />
+
+          <Stack.Screen 
+            name="Home" 
+            component={HomeScreen} 
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen 
+            name="Details" 
+            component={DetailsScreen} 
+            options={{ headerShown: false }}
+          />
+
+          <Stack.Screen 
+            name="Pokemon" 
+            component={PokemonScreen} 
+            options={{ title: 'API Pokémon' }}
+          />
+
+          <Stack.Screen 
+            name="RickMorty" 
+            component={RickMortyScreen} 
+            options={{ title: 'API Rick and Morty' }}
+          />
+
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
