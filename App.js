@@ -9,6 +9,7 @@ import DetailsScreen from './screens/DetailScreen';
 import ExampleScreen from './screens/Exapmle';
 import PokemonScreen from './screens/PokemonScreen';
 import RickMortyScreen from './screens/RickMortyScreen';
+import ChuckNorrisScreen from './screens/ChuckNorrisScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -45,6 +46,11 @@ export default function App() {
             name="RickMorty" 
             component={RickMortyScreen} 
             options={{ title: 'API Rick and Morty' }}
+          />
+          <Stack.Screen 
+            name="ChuckNorris" 
+            component={ChuckNorrisScreen} 
+            options={{ title: 'API de Chuck Norris' }}
           />
 
         </Stack.Navigator>

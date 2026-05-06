@@ -158,21 +158,37 @@ export default function HomeScreen({ navigation }) {
         <ContainerCard tipo="Papel" icon="📄" />
         <EstadoContenedor />
 
+        {/* Botón para la API de Pokémon */}
         <TouchableOpacity 
-  style={{
-    backgroundColor: '#22C55E',
-    padding: 15,
-    borderRadius: 12,
-    marginTop: 20,
-    alignItems: 'center'
-  }}
-  onPress={() => navigation.navigate('Pokemon')}
->
-  <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
-    Ver datos de la API (Pokémon)
-  </Text>
-</TouchableOpacity>
+          style={{
+            backgroundColor: '#22C55E',
+            padding: 15,
+            borderRadius: 12,
+            marginTop: 20,
+            alignItems: 'center'
+          }}
+          onPress={() => navigation.navigate('Pokemon')}
+        >
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
+            Ver datos de la API (Pokémon)
+          </Text>
+        </TouchableOpacity>
 
+        {/* NUEVO BOTÓN: API de Chuck Norris */}
+        <TouchableOpacity 
+          style={{
+            backgroundColor: '#ffaa00',
+            padding: 15,
+            borderRadius: 12,
+            marginTop: 15,
+            alignItems: 'center'
+          }}
+          onPress={() => navigation.navigate('ChuckNorris')}
+        >
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
+            Ir a la API de Chuck Norris
+          </Text>
+        </TouchableOpacity>
 
       </ScrollView>
     </SafeAreaView>
