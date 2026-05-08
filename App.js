@@ -11,12 +11,19 @@ import PokemonScreen from './screens/PokemonScreen';
 import RickMortyScreen from './screens/RickMortyScreen';
 import ChuckNorrisScreen from './screens/ChuckNorrisScreen';
 
+// IMPORT STAR WARS
+import StarWarsScreen from './screens/StarWarsScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
   return (
+
     <SafeAreaProvider>
+
       <NavigationContainer>
+
         <Stack.Navigator>
 
           <Stack.Screen 
@@ -47,14 +54,25 @@ export default function App() {
             component={RickMortyScreen} 
             options={{ title: 'API Rick and Morty' }}
           />
+
           <Stack.Screen 
             name="ChuckNorris" 
             component={ChuckNorrisScreen} 
             options={{ title: 'API de Chuck Norris' }}
           />
 
+          {/* STAR WARS */}
+          <Stack.Screen 
+            name="StarWars" 
+            component={StarWarsScreen} 
+            options={{ title: 'API Star Wars' }}
+          />
+
         </Stack.Navigator>
+
       </NavigationContainer>
+
     </SafeAreaProvider>
+
   );
 }
