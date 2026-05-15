@@ -174,6 +174,22 @@ export default function HomeScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
+        {/* BOTÓN STAR WARS */}
+        <TouchableOpacity 
+          style={{
+            backgroundColor: '#1162e5',
+            padding: 15,
+            borderRadius: 12,
+            marginTop: 20,
+            alignItems: 'center'
+          }}
+          onPress={() => navigation.navigate('StarWars')}
+        >
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
+            Ver datos de la API (Star Wars)
+          </Text>
+        </TouchableOpacity>
+
         {/* NUEVO BOTÓN: API de Chuck Norris */}
         <TouchableOpacity 
           style={{

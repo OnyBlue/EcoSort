@@ -12,12 +12,19 @@ import RickMortyScreen from './screens/RickMortyScreen';
 import ChuckNorrisScreen from './screens/ChuckNorrisScreen';
 import Weather from './screens/Weather';
 
+// IMPORT STAR WARS
+import StarWarsScreen from './screens/StarWarsScreen';
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+
   return (
+
     <SafeAreaProvider>
+
       <NavigationContainer>
+
         <Stack.Navigator>
 
           <Stack.Screen 
@@ -48,6 +55,7 @@ export default function App() {
             component={RickMortyScreen} 
             options={{ title: 'API Rick and Morty' }}
           />
+
           <Stack.Screen 
             name="ChuckNorris" 
             component={ChuckNorrisScreen} 
@@ -58,10 +66,18 @@ export default function App() {
             name="Weather" 
             component={Weather} 
             options={{ title: 'Estado del Clima' }}
+          {/* STAR WARS */}
+          <Stack.Screen 
+            name="StarWars" 
+            component={StarWarsScreen} 
+            options={{ title: 'API Star Wars' }}
           />
 
         </Stack.Navigator>
+
       </NavigationContainer>
+
     </SafeAreaProvider>
+
   );
 }
