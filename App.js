@@ -10,6 +10,7 @@ import ExampleScreen from './screens/Exapmle';
 import PokemonScreen from './screens/PokemonScreen';
 import RickMortyScreen from './screens/RickMortyScreen';
 import ChuckNorrisScreen from './screens/ChuckNorrisScreen';
+import Weather from './screens/Weather';
 
 // IMPORT STAR WARS
 import StarWarsScreen from './screens/StarWarsScreen';
@@ -61,6 +62,10 @@ export default function App() {
             options={{ title: 'API de Chuck Norris' }}
           />
 
+          <Stack.Screen 
+            name="Weather" 
+            component={Weather} 
+            options={{ title: 'Estado del Clima' }}
           {/* STAR WARS */}
           <Stack.Screen 
             name="StarWars" 
