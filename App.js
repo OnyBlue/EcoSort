@@ -10,6 +10,7 @@ import ExampleScreen from './screens/Exapmle';
 import PokemonScreen from './screens/PokemonScreen';
 import RickMortyScreen from './screens/RickMortyScreen';
 import ChuckNorrisScreen from './screens/ChuckNorrisScreen';
+import Weather from './screens/Weather';
 
 const Stack = createNativeStackNavigator();
 
@@ -51,6 +52,12 @@ export default function App() {
             name="ChuckNorris" 
             component={ChuckNorrisScreen} 
             options={{ title: 'API de Chuck Norris' }}
+          />
+
+          <Stack.Screen 
+            name="Weather" 
+            component={Weather} 
+            options={{ title: 'Estado del Clima' }}
           />
 
         </Stack.Navigator>

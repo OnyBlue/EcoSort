@@ -190,6 +190,22 @@ export default function HomeScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
 
+        {/* NUEVO BOTÓN: API de Clima (OpenWeather) */}
+        <TouchableOpacity 
+          style={{
+            backgroundColor: '#00d4ff', // Color celeste/clima
+            padding: 15,
+            borderRadius: 12,
+            marginTop: 15,
+            alignItems: 'center'
+          }}
+          onPress={() => navigation.navigate('Weather')} // Asegúrate que este nombre coincida con tu Stack Navigator
+        >
+          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
+            Consultar Clima Actual
+          </Text>
+        </TouchableOpacity>
+
       </ScrollView>
     </SafeAreaView>
   );
