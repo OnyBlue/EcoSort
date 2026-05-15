@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView, StatusBar, Alert } from 'react-native';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  StatusBar, 
+  Alert, 
+  Modal 
+} from 'react-native';
 
 // --- INTEGRACIÓN CON FIREBASE ---
 import { db } from '../firebaseConfig'; 
@@ -16,22 +26,33 @@ export default function HomeScreen({ navigation }) {
   });
 
   const [seleccionado, setSeleccionado] = useState('Plástico');
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // Colores dinámicos según el nivel
   const getStatusColor = (nivel) => {
     if (nivel >= 85) return '#EF4444'; 
     if (nivel >= 50) return '#F59E0B'; 
     return '#10B981'; 
   };
 
-  // FUNCIÓN PARA ACTUALIZAR NIVEL Y GUARDAR EN LA NUBE
+  // --- FUNCIÓN CERRAR SESIÓN ---
+  const handleLogout = () => {
+    Alert.alert(
+      "Cerrar Sesión",
+      "¿Estás seguro de que deseas salir?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { 
+          text: "Salir", 
+          onPress: () => navigation.replace('Login'), // Reemplaza Home por Login
+          style: "destructive" 
+        }
+      ]
+    );
+  };
+
   const modificarNivelYGuardar = async (cantidad) => {
     const nuevoNivel = Math.max(0, Math.min(100, niveles[seleccionado] + cantidad));
-    
-    setNiveles(prev => ({
-      ...prev,
-      [seleccionado]: nuevoNivel
-    }));
+    setNiveles(prev => ({ ...prev, [seleccionado]: nuevoNivel }));
 
     try {
       await addDoc(collection(db, "reportes_reciclaje"), {
@@ -40,14 +61,12 @@ export default function HomeScreen({ navigation }) {
         fecha: serverTimestamp(),
         tipo_accion: "Aumento de nivel"
       });
-      console.log("Datos sincronizados con éxito");
     } catch (error) {
       console.error("Error al subir a Firebase: ", error);
       Alert.alert("Error de conexión", "No se pudo guardar en la nube.");
     }
   };
 
-  // Función para vaciar el contenedor
   const reiniciarNivel = async () => {
     setNiveles({...niveles, [seleccionado]: 0});
     try {
@@ -89,7 +108,6 @@ export default function HomeScreen({ navigation }) {
         }}
       >
         <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(nivelActual) }]} />
-        
         <View style={styles.cardContent}>
           <Text style={styles.cardIcon}>{icon}</Text>
           <View>
@@ -97,7 +115,6 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.cardSubtitle}>Nivel: {nivelActual}%</Text>
           </View>
         </View>
-
         {esActivo ? (
           <View style={styles.reportBadge}>
             <Text style={styles.reportText}>Reporte →</Text>
@@ -112,14 +129,23 @@ export default function HomeScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      <ScrollView contentContainerStyle={styles.containerMain}>
-        
-        <View style={styles.header}>
+      
+      {/* HEADER CON BOTÓN DE SALIR */}
+      <View style={styles.topBar}>
+        <View style={styles.headerInfo}>
           <Text style={styles.title}>🌱 EcoSort App</Text>
           <Text style={styles.tagline}>Gestión de residuo inteligente</Text>
         </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Salir</Text>
+        </TouchableOpacity>
+      </View>
 
-        <MenuDesplegable navigation={navigation} />
+      <ScrollView contentContainerStyle={styles.containerMain}>
+        
+        {/* COMPONENTES DE ESTADO */}
+        {/* <EstadoContenedor /> */}
+        {/*<MenuDesplegable navigation={navigation} />*/}
 
         <View style={styles.controlPanel}>
           <Text style={styles.controlLabel}>
@@ -130,10 +156,7 @@ export default function HomeScreen({ navigation }) {
           </Text>
           
           <View style={styles.row}>
-            <TouchableOpacity 
-              style={styles.mainButton} 
-              onPress={() => modificarNivelYGuardar(10)} 
-            >
+            <TouchableOpacity style={styles.mainButton} onPress={() => modificarNivelYGuardar(10)}>
               <Text style={styles.buttonText}>Aumentar</Text>
             </TouchableOpacity>
 
@@ -145,10 +168,10 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.mainButton, { backgroundColor: '#97ce4c' }]} 
-              onPress={() => navigation.navigate('RickMorty')} 
+              style={[styles.mainButton, { backgroundColor: '#500b7e' }]} 
+              onPress={() => setModalVisible(true)}
             >
-              <Text style={styles.buttonText}>PEPINILLO RICK</Text>
+              <Text style={[styles.buttonText, { color: '#ffffff' }]}>🚀 APIs</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -156,71 +179,64 @@ export default function HomeScreen({ navigation }) {
         <ContainerCard tipo="Plástico" icon="🥤" />
         <ContainerCard tipo="Metal" icon="🥫" />
         <ContainerCard tipo="Papel" icon="📄" />
-        <EstadoContenedor />
 
-        {/* Botón para la API de Pokémon */}
-        <TouchableOpacity 
-          style={{
-            backgroundColor: '#22C55E',
-            padding: 15,
-            borderRadius: 12,
-            marginTop: 20,
-            alignItems: 'center'
-          }}
-          onPress={() => navigation.navigate('Pokemon')}
+        {/* --- MODAL DE APIS --- */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
         >
-          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
-            Ver datos de la API (Pokémon)
-          </Text>
-        </TouchableOpacity>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Selecciona una Fuente</Text>
+              
+              <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+                <TouchableOpacity 
+                  style={[styles.modalOption, { backgroundColor: '#22C55E' }]} 
+                  onPress={() => { setModalVisible(false); navigation.navigate('Pokemon'); }}
+                >
+                  <Text style={styles.modalOptionText}>Pokémon Data</Text>
+                </TouchableOpacity>
 
-        {/* BOTÓN STAR WARS */}
-        <TouchableOpacity 
-          style={{
-            backgroundColor: '#1162e5',
-            padding: 15,
-            borderRadius: 12,
-            marginTop: 20,
-            alignItems: 'center'
-          }}
-          onPress={() => navigation.navigate('StarWars')}
-        >
-          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
-            Ver datos de la API (Star Wars)
-          </Text>
-        </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalOption, { backgroundColor: '#1162e5' }]} 
+                  onPress={() => { setModalVisible(false); navigation.navigate('StarWars'); }}
+                >
+                  <Text style={styles.modalOptionText}>Star Wars Universe</Text>
+                </TouchableOpacity>
 
-        {/* NUEVO BOTÓN: API de Chuck Norris */}
-        <TouchableOpacity 
-          style={{
-            backgroundColor: '#ffaa00',
-            padding: 15,
-            borderRadius: 12,
-            marginTop: 15,
-            alignItems: 'center'
-          }}
-          onPress={() => navigation.navigate('ChuckNorris')}
-        >
-          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
-            Ir a la API de Chuck Norris
-          </Text>
-        </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalOption, { backgroundColor: '#ffaa00' }]} 
+                  onPress={() => { setModalVisible(false); navigation.navigate('ChuckNorris'); }}
+                >
+                  <Text style={styles.modalOptionText}>Chuck Norris Facts</Text>
+                </TouchableOpacity>
 
-        {/* NUEVO BOTÓN: API de Clima (OpenWeather) */}
-        <TouchableOpacity 
-          style={{
-            backgroundColor: '#00d4ff', // Color celeste/clima
-            padding: 15,
-            borderRadius: 12,
-            marginTop: 15,
-            alignItems: 'center'
-          }}
-          onPress={() => navigation.navigate('Weather')} // Asegúrate que este nombre coincida con tu Stack Navigator
-        >
-          <Text style={{ color: '#FFF', fontWeight: 'bold', fontSize: 16 }}>
-            Consultar Clima Actual
-          </Text>
-        </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.modalOption, { backgroundColor: '#00d4ff' }]} 
+                  onPress={() => { setModalVisible(false); navigation.navigate('Weather'); }}
+                >
+                  <Text style={styles.modalOptionText}>Estado del Clima</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={[styles.modalOption, { backgroundColor: '#8B5CF6' }]} 
+                  onPress={() => { setModalVisible(false); navigation.navigate('RickMorty'); }}
+                >
+                  <Text style={styles.modalOptionText}>Rick & Morty Wiki</Text>
+                </TouchableOpacity>
+              </ScrollView>
+
+              <TouchableOpacity 
+                style={styles.closeModalButton} 
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.closeModalText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
 
       </ScrollView>
     </SafeAreaView>
@@ -229,10 +245,27 @@ export default function HomeScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F8F9FA' },
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#FFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#EDF2F7'
+  },
+  headerInfo: { flex: 1 },
+  logoutButton: {
+    backgroundColor: '#FEE2E2',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 10,
+  },
+  logoutText: { color: '#EF4444', fontWeight: 'bold', fontSize: 13 },
   containerMain: { padding: 20 },
-  header: { marginBottom: 20 },
-  title: { fontSize: 26, fontWeight: 'bold', color: '#1A202C' },
-  tagline: { fontSize: 14, color: '#718096' },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#1A202C' },
+  tagline: { fontSize: 13, color: '#718096' },
 
   controlPanel: {
     backgroundColor: '#FFF',
@@ -244,11 +277,12 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.1,
     shadowRadius: 10,
+    marginTop: 10
   },
   controlLabel: { fontSize: 13, fontWeight: 'bold', color: '#A0AEC0', textTransform: 'uppercase', letterSpacing: 1 },
   numero: { fontSize: 56, fontWeight: 'bold', marginVertical: 5 },
   
-  row: { flexDirection: 'row', gap: 10, marginTop: 10, width: '100%' },
+  row: { flexDirection: 'row', gap: 8, marginTop: 10, width: '100%' },
   mainButton: {
     backgroundColor: '#2196F3',
     height: 50,
@@ -257,7 +291,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 13, textAlign: 'center' },
+  buttonText: { color: '#FFF', fontWeight: 'bold', fontSize: 12, textAlign: 'center' },
 
   card: {
     backgroundColor: '#FFF',
@@ -287,5 +321,39 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   reportText: { color: '#FFF', fontSize: 11, fontWeight: 'bold' },
-  dotMark: { color: '#CBD5E0', fontSize: 18, marginRight: 5 }
+  dotMark: { color: '#CBD5E0', fontSize: 18, marginRight: 5 },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: '85%',
+    backgroundColor: '#FFF',
+    borderRadius: 30,
+    padding: 25,
+    alignItems: 'center',
+    maxHeight: '80%',
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1A202C',
+    marginBottom: 20,
+  },
+  modalOption: {
+    width: '100%',
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  modalOptionText: { color: '#FFF', fontWeight: 'bold', fontSize: 16 },
+  closeModalButton: {
+    marginTop: 10,
+    padding: 10,
+  },
+  closeModalText: { color: '#EF4444', fontWeight: 'bold', fontSize: 16 }
 });

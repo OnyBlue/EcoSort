@@ -14,6 +14,7 @@ import Weather from './screens/Weather';
 
 // IMPORT STAR WARS
 import StarWarsScreen from './screens/StarWarsScreen';
+import LoginScreen from './screens/LoginScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,8 +26,13 @@ export default function App() {
 
       <NavigationContainer>
 
-        <Stack.Navigator>
-
+        <Stack.Navigator initialRouteName='Login'>
+          <Stack.Screen 
+            name="Login" 
+            component={LoginScreen} 
+            options={{ headerShown: false }} 
+          />
+          
           <Stack.Screen 
             name="Example" 
             component={ExampleScreen}
@@ -66,7 +72,8 @@ export default function App() {
             name="Weather" 
             component={Weather} 
             options={{ title: 'Estado del Clima' }}
-          {/* STAR WARS */}
+          />
+          
           <Stack.Screen 
             name="StarWars" 
             component={StarWarsScreen} 
