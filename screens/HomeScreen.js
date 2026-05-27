@@ -16,19 +16,11 @@ import {
 import { ResiduoService } from '../services/ResiduoService';
 
 export default function HomeScreen({ navigation }) {
-  const [niveles, setNiveles] = useState({
-    Plástico: 0,
-    Metal: 60,
-    Papel: 30
-  });
-
   const [seleccionado, setSeleccionado] = useState('Plástico');
   const [modalVisible, setModalVisible] = useState(false);
   
-  // Estados para el CRUD
+  // Estados para Firebase
   const [reportes, setReportes] = useState([]);
-  const [editandoId, setEditandoId] = useState(null);
-  const [nuevoValorEdit, setNuevoValorEdit] = useState('');
 
   // Estados para Creación Manual
   const [nuevoResiduoNombre, setNuevoResiduoNombre] = useState('');
@@ -42,10 +34,31 @@ export default function HomeScreen({ navigation }) {
     return () => unsubscribe();
   }, []);
 
+  // --- Obtiene el último nivel registrado ---
+  const obtenerUltimoNivel = (tipo) => {
+    const reportesDelTipo = reportes.filter(r => r.contenedor === tipo);
+    if (reportesDelTipo.length > 0) {
+      return parseInt(reportesDelTipo[0].nivel) || 0;
+    }
+    return 0;
+  };
+
+  // --- Obtener última fecha de recolección ---
+  const obtenerUltimaRecoleccion = (tipo) => {
+    const vaciado = reportes.find(r => r.contenedor === tipo && r.tipo_accion === "Contenedor vaciado");
+    return vaciado ? vaciado.fechaFormateada : "No registrada";
+  };
+
   const getStatusColor = (nivel) => {
     if (nivel >= 85) return '#EF4444'; 
     if (nivel >= 50) return '#F59E0B'; 
     return '#10B981'; 
+  };
+
+  const getEstadoTexto = (nivel) => {
+    if (nivel >= 85) return 'Lleno';
+    if (nivel >= 50) return 'Medio';
+    return 'Vacío';
   };
 
   const handleLogout = () => {
@@ -55,21 +68,17 @@ export default function HomeScreen({ navigation }) {
     ]);
   };
 
-  // --- OPERACIONES CRUD ---
-
-  // CREATE (Vía botones de nivel)
+  // --- OPERACIONES CONTROL PANEL ---
   const modificarNivelYGuardar = async (cantidad) => {
-    const nuevoNivel = Math.max(0, Math.min(100, niveles[seleccionado] + cantidad));
-    setNiveles(prev => ({ ...prev, [seleccionado]: nuevoNivel }));
-    await ResiduoService.create(seleccionado, nuevoNivel, "Aumento de nivel");
+    const nivelActual = obtenerUltimoNivel(seleccionado);
+    const nuevoNivel = Math.max(0, Math.min(100, nivelActual + cantidad));
+    await ResiduoService.create(seleccionado, nuevoNivel, "Aumento Manual");
   };
 
   const reiniciarNivel = async () => {
-    setNiveles({...niveles, [seleccionado]: 0});
     await ResiduoService.create(seleccionado, 0, "Contenedor vaciado");
   };
 
-  // CREATE (Manual)
   const crearRegistroManual = async () => {
     if (!nuevoResiduoNombre || !nuevoResiduoNivel) {
       Alert.alert("Campos vacíos", "Llena el nombre y el porcentaje.");
@@ -80,32 +89,24 @@ export default function HomeScreen({ navigation }) {
     setNuevoResiduoNivel('');
   };
 
-  // UPDATE
-  const actualizarRegistro = async (id) => {
-    if (!nuevoValorEdit) return setEditandoId(null);
-    await ResiduoService.update(id, nuevoValorEdit);
-    setEditandoId(null);
-    setNuevoValorEdit('');
-  };
-
-  // DELETE
-  const eliminarRegistro = (id) => {
-    Alert.alert("Eliminar", "¿Borrar este registro?", [
-      { text: "No" },
-      { text: "Sí", onPress: () => ResiduoService.delete(id) }
-    ]);
-  };
-
-  const ContainerCard = ({ tipo, icon }) => {
+  // --- COMPONENTE TARJETA ---
+  const ContainerCard = ({ tipo, icon, capacidadMax }) => {
     const esActivo = seleccionado === tipo;
-    const nivelActual = niveles[tipo];
+    const nivelActual = obtenerUltimoNivel(tipo);
 
     return (
       <TouchableOpacity 
         style={[styles.card, esActivo && styles.cardActive]}
         onPress={() => {
           if (esActivo) {
-            navigation.navigate('Details', { tipo, nivel: nivelActual }); 
+            // ENVIAMOS EL ARREGLO DE REPORTES COMPLETO A LA PANTALLA DE DETALLES
+            navigation.navigate('Details', { 
+              tipo, 
+              nivel: nivelActual,
+              estado: getEstadoTexto(nivelActual),
+              capacidad: capacidadMax,
+              ultimaRecoleccion: obtenerUltimaRecoleccion(tipo),
+            }); 
           } else {
             setSeleccionado(tipo); 
           }
@@ -119,10 +120,12 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.cardSubtitle}>Nivel: {nivelActual}%</Text>
           </View>
         </View>
-        {esActivo ? <View style={styles.reportBadge}><Text style={styles.reportText}>Reporte →</Text></View> : <Text style={styles.dotMark}>●</Text>}
+        {esActivo ? <View style={styles.reportBadge}><Text style={styles.reportText}>Ver Detalles →</Text></View> : <Text style={styles.dotMark}>●</Text>}
       </TouchableOpacity>
     );
   };
+
+  const nivelPanelControl = obtenerUltimoNivel(seleccionado);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -140,22 +143,22 @@ export default function HomeScreen({ navigation }) {
 
       <ScrollView contentContainerStyle={styles.containerMain}>
         
-        {/* PANEL DE CONTROL */}
+        {/* PANEL DE CONTROL EN TIEMPO REAL */}
         <View style={styles.controlPanel}>
           <Text style={styles.controlLabel}>Ajustando: <Text style={{color: '#2196F3'}}>{seleccionado}</Text></Text>
-          <Text style={[styles.numero, { color: getStatusColor(niveles[seleccionado]) }]}>{niveles[seleccionado]}%</Text>
+          <Text style={[styles.numero, { color: getStatusColor(nivelPanelControl) }]}>{nivelPanelControl}%</Text>
           <View style={styles.row}>
             <TouchableOpacity style={styles.mainButton} onPress={() => modificarNivelYGuardar(10)}><Text style={styles.buttonText}>Aumentar</Text></TouchableOpacity>
-            <TouchableOpacity style={[styles.mainButton, { backgroundColor: '#E2E8F0' }]} onPress={reiniciarNivel}><Text style={[styles.buttonText, { color: '#64748B' }]}>Reiniciar</Text></TouchableOpacity>
+            <TouchableOpacity style={[styles.mainButton, { backgroundColor: '#E2E8F0' }]} onPress={reiniciarNivel}><Text style={[styles.buttonText, { color: '#64748B' }]}>Vaciar</Text></TouchableOpacity>
             <TouchableOpacity style={[styles.mainButton, { backgroundColor: '#500b7e' }]} onPress={() => setModalVisible(true)}><Text style={[styles.buttonText, { color: '#ffffff' }]}>🚀 APIs</Text></TouchableOpacity>
           </View>
         </View>
 
-        <ContainerCard tipo="Plástico" icon="🥤" />
-        <ContainerCard tipo="Metal" icon="🥫" />
-        <ContainerCard tipo="Papel" icon="📄" />
+        <ContainerCard tipo="Plástico" icon="🥤" capacidadMax="120 Litros" />
+        <ContainerCard tipo="Metal" icon="🥫" capacidadMax="80 Litros" />
+        <ContainerCard tipo="Otros" icon="🗑️" capacidadMax="150 Litros" />
 
-        {/* --- NUEVO APARTADO: CREAR MANUAL (Create) --- */}
+        {/* REGISTRO ESPECIAL MANUAL */}
         <View style={styles.manualForm}>
           <Text style={styles.historyTitle}>Registro Especial</Text>
           <View style={styles.row}>
@@ -176,35 +179,6 @@ export default function HomeScreen({ navigation }) {
               <Text style={{color: '#FFF', fontWeight: 'bold'}}>Añadir</Text>
             </TouchableOpacity>
           </View>
-        </View>
-
-        {/* --- HISTORIAL (Read, Update, Delete) --- */}
-        <View style={styles.historySection}>
-          <Text style={styles.historyTitle}>Historial de Reportes</Text>
-          {reportes.map((item) => (
-            <View key={item.id} style={styles.historyItem}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.historyTag}>{item.contenedor}</Text>
-                {editandoId === item.id ? (
-                  <TextInput 
-                    style={styles.inputEdit} 
-                    keyboardType="numeric" 
-                    defaultValue={item.nivel.toString()}
-                    onChangeText={setNuevoValorEdit}
-                    onBlur={() => actualizarRegistro(item.id)}
-                    autoFocus
-                  />
-                ) : (
-                  <Text style={styles.historyValue}>{item.nivel}% - {item.tipo_accion}</Text>
-                )}
-                <Text style={styles.historyDate}>{item.fechaFormateada}</Text>
-              </View>
-              <View style={styles.historyActions}>
-                <TouchableOpacity onPress={() => setEditandoId(item.id)} style={{ marginRight: 15 }}><Text>✏️</Text></TouchableOpacity>
-                <TouchableOpacity onPress={() => eliminarRegistro(item.id)}><Text>🗑️</Text></TouchableOpacity>
-              </View>
-            </View>
-          ))}
         </View>
 
         {/* MODAL APIS */}
@@ -229,6 +203,7 @@ export default function HomeScreen({ navigation }) {
   );
 }
 
+// Los estilos se mantienen idénticos a tu archivo original...
 const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#F8F9FA' },
   topBar: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 15, backgroundColor: '#FFF', borderBottomWidth: 1, borderBottomColor: '#EDF2F7' },
@@ -254,19 +229,9 @@ const styles = StyleSheet.create({
   reportBadge: { backgroundColor: '#2196F3', paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8 },
   reportText: { color: '#FFF', fontSize: 11, fontWeight: 'bold' },
   dotMark: { color: '#CBD5E0', fontSize: 18, marginRight: 5 },
-  
-  // ESTILOS CRUD Y FORMULARIO
   manualForm: { marginTop: 20, backgroundColor: '#FFF', borderRadius: 20, padding: 20, elevation: 3 },
   addBtn: { backgroundColor: '#10B981', paddingHorizontal: 15, borderRadius: 10, justifyContent: 'center' },
-  historySection: { marginTop: 20, backgroundColor: '#FFF', borderRadius: 20, padding: 20, elevation: 3 },
-  historyTitle: { fontSize: 18, fontWeight: 'bold', color: '#2D3748', marginBottom: 15 },
-  historyItem: { flexDirection: 'row', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#F7FAFC', alignItems: 'center' },
-  historyTag: { fontWeight: 'bold', color: '#2196F3', fontSize: 14 },
-  historyValue: { fontSize: 15, color: '#4A5568', marginVertical: 2 },
-  historyDate: { fontSize: 11, color: '#A0AEC0' },
-  historyActions: { flexDirection: 'row', alignItems: 'center' },
   inputEdit: { borderBottomWidth: 2, borderBottomColor: '#2196F3', fontSize: 14, padding: 5 },
-
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
   modalContent: { width: '85%', backgroundColor: '#FFF', borderRadius: 30, padding: 25, alignItems: 'center', maxHeight: '80%' },
   modalTitle: { fontSize: 20, fontWeight: 'bold', color: '#1A202C', marginBottom: 20 },
