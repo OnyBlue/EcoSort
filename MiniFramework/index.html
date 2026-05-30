@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>EcoSort - Renderizador Web de Librería</title>
+  <style>
+    /* Estructuración para centrar el simulador móvil en pantalla */
+    body { font-family: Arial, sans-serif; background-color: #F8F9FA; padding: 20px; display: flex; justify-content: center; }
+    #root-celular { width: 420px; background: white; border-radius: 28px; box-shadow: 0 6px 20px rgba(0,0,0,0.08); overflow: hidden; padding-bottom: 25px; box-sizing: border-box; }
+    
+    /* Reglas CSS para componentes del Framework */
+    .status-bar { height: 15px; width: 100%; }
+    .app-header { display: flex; align-items: center; padding: 18px 20px; border-bottom: 1px solid #EDF2F7; box-sizing: border-box; }
+    .control-panel { background: #FFF; border: 1px solid #E2E8F0; border-radius: 24px; padding: 20px; margin: 15px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02); box-sizing: border-box; }
+    .control-label { font-size: 13px; font-weight: bold; color: #A0AEC0; text-transform: uppercase; letter-spacing: 1px; }
+    .numero-grande { font-size: 56px; margin: 5px 0; font-weight: bold; }
+    .button-row { display: flex; gap: 8px; justify-content: center; margin-top: 10px; width: 100%; box-sizing: border-box; }
+    .main-button { border: none; padding: 14px 10px; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; flex: 1; font-size: 13px; box-sizing: border-box; }
+    
+    /* Tarjetas de Contenedores */
+    .card { display: flex; align-items: center; background: #FFF; border-radius: 18px; padding: 16px; margin: 10px 15px; box-shadow: 0 2px 6px rgba(0,0,0,0.03); cursor: pointer; border: 2px solid transparent; transition: 0.2s; box-sizing: border-box; }
+    .card-active { border-color: #2196F3; background-color: #F0F9FF; }
+    .status-indicator { width: 6px; height: 45px; border-radius: 3px; margin-right: 15px; }
+    .card-content { flex: 1; display: flex; align-items: center; }
+    .card-icon { font-size: 30px; margin-right: 12px; }
+    .cardTextContainer h3 { margin: 0; font-size: 17px; color: #2D3748; }
+    .cardTextContainer p { margin: 2px 0 0 0; font-size: 14px; color: #718096; }
+    .divider { border: 0; height: 1px; background: #EDF2F7; margin: 15px 20px; }
+    
+    /* Inputs del Formulario Manual sin desbordes */
+    .input-crud { border: none; border-bottom: 2px solid #2196F3; font-size: 13px; outline: none; background: #F7FAFC; padding: 8px; border-radius: 6px; min-width: 0; box-sizing: border-box; }
+    .history-title { font-weight: bold; font-size: 16px; color: #2D3748; margin: 15px 20px 5px 20px; display: block; }
+  </style>
+</head>
+<body>
+
+  <div id="root-celular"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
